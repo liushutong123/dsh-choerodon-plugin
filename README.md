@@ -9,7 +9,7 @@ Host 半区负责登录、平台请求与模型路由，Client 半区提供左�
 
 已在 DSH 0.2.2-rc.5 / 0.2.3（desktop profile）上验证。
 
-从 GitHub 装：
+从 GitHub 装1：
 
 ```
 dsh plugin --profile <profile> add git+https://github.com/liushutong123/dsh-choerodon-plugin.git
