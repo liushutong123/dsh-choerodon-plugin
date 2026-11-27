@@ -1,6 +1,6 @@
 {
   "name": "dsh-choerodon",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "type": "module",
   "description": "猪齿鱼（Choerodon）账号、项目上下文、任务看板（筛选/搜索/评论/工时/附件/子任务/关联/建单）与模型接入",
   "author": "shutong.liu@hand-china.com",

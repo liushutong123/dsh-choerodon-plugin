@@ -24,7 +24,7 @@ plugin_manager install_bundle target=<插件目录绝对路径>
 或者用打好的 tarball：
 
 ```
-plugin_manager install_bundle target=file:<dsh-choerodon-0.9.1.tgz 的绝对路径>
+plugin_manager install_bundle target=file:<dsh-choerodon-0.9.2.tgz 的绝对路径>
 ```
 
 装完重启 DSH。侧栏出现「猪齿鱼」，设置里的插件列表会出现 `dsh-choerodon`。
@@ -166,6 +166,10 @@ plugin_manager install_bundle target=file:<dsh-choerodon-0.9.1.tgz 的绝对路�
 「有新任务」里的每条都能点开对应工作项。点进去时如果单已经不在了（被删、没权限），
 面板顶部会明确说「这张工作项已经没了」并给刷新入口，不会开一个空抽屉；
 如果单已经改派给别人，详情照常能看，但会提示「已不在你名下、关掉后要切到「全部」才找得到」。
+## v0.9.2 新增
+
+- 会话头不再放「本次工作项」入口：从工作项建的会话就停在输入框那一屏，再放一个入口只是和草稿重复。
+- 工作项上记着的 sessionId 先核对会话是否真的还在（内存或持久化任一处），被「删除会话」清掉的不再带出来，顺手清掉那条失效绑定。
 ## v0.9.1 新增
 
 - 建会话时的工作项全文改由**输入框草稿**承载：走 `conversation.input.requestDraftInitialization` 填进去，
