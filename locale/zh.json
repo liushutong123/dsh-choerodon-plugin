@@ -1,0 +1,8 @@
+{
+  "meta": {
+    "title": "猪齿鱼",
+    "description": "把猪齿鱼接进 DSH：左侧「猪齿鱼」面板可登录、选组织与项目，并把项目模型以 choerodon- 前缀写进模型选择器。「任务看板」按状态分泳道看工作项，默认只看自己经办的，也能切到全部看别人的；史诗与经办人都是可搜索的多选筛选，勾选即重查；工具栏可按概要/正文搜工作项。卡片详情里能改经办人（指定成员 / 改为我 / 清空）、读评论与发评论（@姓名 转提及）、改预估与剩余工时、点可流转状态切状态、上下传附件（下载走平台预签名，私有桶直链会 403）、按任务建分支与 worktree 并自动开一个已带工作项上下文的会话；建会话前可选保持原经办人、改为我或指定成员，也可不推进状态。工具栏能新建任务（可选类型、优先级、模块、冲刺、报告人、预估、计划时间、附件），卡片详情能按当前单复制一条新任务。模型侧提供 choerodon_board / choerodon_issue / choerodon_search / choerodon_attachment_url / choerodon_dict / choerodon_create_issue / choerodon_update / choerodon_update_fields / choerodon_change_type / choerodon_comment / choerodon_estimate / choerodon_activity / choerodon_worklog / choerodon_inbox / choerodon_worktree / choerodon_delete_issue 十六个工具。登录凭据与设备身份存在 $DSH_HOME/choerodon-harness/state.json；不执行 push、merge、rebase、reset --hard。",
+    "detail": "docs/DETAIL.md"
+  },
+  "description": "把猪齿鱼接进 DSH：左侧「猪齿鱼」面板可登录、选组织与项目，并把项目模型以 choerodon- 前缀写进模型选择器。「任务看板」按状态分泳道看工作项，默认只看自己经办的，也能切到全部看别人的；史诗与经办人都是可搜索的多选筛选，勾选即重查；工具栏可按概要/正文搜工作项。卡片详情里能改经办人（指定成员 / 改为我 / 清空）、读评论与发评论（@姓名 转提及）、改预估与剩余工时、点可流转状态切状态、上下传附件（下载走平台预签名，私有桶直链会 403）、按任务建分支与 worktree 并自动开一个已带工作项上下文的会话；建会话前可选保持原经办人、改为我或指定成员，也可不推进状态。工具栏能新建任务（可选类型、优先级、模块、冲刺、报告人、预估、计划时间、附件），卡片详情能按当前单复制一条新任务。模型侧提供 choerodon_board / choerodon_issue / choerodon_search / choerodon_attachment_url / choerodon_dict / choerodon_create_issue / choerodon_update / choerodon_update_fields / choerodon_change_type / choerodon_comment / choerodon_estimate / choerodon_activity / choerodon_worklog / choerodon_inbox / choerodon_worktree / choerodon_delete_issue 十六个工具。登录凭据与设备身份存在 $DSH_HOME/choerodon-harness/state.json；不执行 push、merge、rebase、reset --hard。"
+}

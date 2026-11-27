@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Choerodon">
+  <rect width="64" height="64" rx="14" fill="#5969e8"/>
+  <path d="M14 34c7 0 10-3.6 11.8-7.9C28 20.6 31 18 36 18c8.6 0 14.4 5 14.4 12.2 0 7-5.2 11.8-12.2 11.8h-5.1c-2.2 0-4.2.7-6 2L20 49v-5.7C16.4 42.4 14 38.9 14 34Z" fill="#fff"/>
+  <circle cx="40.5" cy="30" r="2.4" fill="#5969e8"/>
+</svg>

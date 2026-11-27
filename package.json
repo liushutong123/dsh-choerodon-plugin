@@ -1,0 +1,54 @@
+{
+  "name": "dsh-choerodon",
+  "version": "0.9.1",
+  "type": "module",
+  "description": "猪齿鱼（Choerodon）账号、项目上下文、任务看板（筛选/搜索/评论/工时/附件/子任务/关联/建单）与模型接入",
+  "author": "shutong.liu@hand-china.com",
+  "license": "Apache-2.0",
+  "icon": "icon.svg",
+  "homepage": "https://github.com/liushutong123/dsh-choerodon-plugin#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liushutong123/dsh-choerodon-plugin.git"
+  },
+  "bugs": {
+    "url": "https://github.com/liushutong123/dsh-choerodon-plugin/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "choerodon",
+    "猪齿鱼",
+    "cordis"
+  ],
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale",
+    "docs",
+    "icon.svg",
+    "README.md",
+    "LICENSE"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-sidebar"
+      ]
+    }
+  }
+}
