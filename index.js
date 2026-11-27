@@ -1777,7 +1777,7 @@ export class ChoerodonPlugin {
     return {
       detail,
       transitions,
-      boundSession: this.boundSessionOf(id),
+      boundSession: await this.boundSessionOf(id),
       // 下面这些详情接口本来就一并返回，不用再打别的接口，省一次往返。
       attachments: (Array.isArray(raw?.issueAttachmentVOList) ? raw.issueAttachmentVOList : []).map((row) => ({
         id: String(row?.attachmentId ?? ''),
@@ -1844,20 +1844,72 @@ export class ChoerodonPlugin {
     }
   }
 
-  /** 这个工作项已经建过会话时，把它带出来，面板可以直接跳过去。 */
-  boundSessionOf(issueId) {
+  /**
+   * 这个工作项已经建过会话时，把它带出来，面板可以直接跳过去。
+   *
+   * <p>账上的 sessionId 可能已经在侧栏被「删除会话」清掉了，这里必须核对会话还真的
+   * 存在——不然面板会给出一个「打开会话」按钮，点了跳进一个不存在的会话。核对分两路：
+   * 内存里挂着（活会话）或持久化里还有（冷会话）才算数。两路都没有就当作没建过，
+   * 顺手把这条绑定清掉，别让它一直指着一个死 id。</p>
+   */
+  async boundSessionOf(issueId) {
     const hit = (this.state.worktrees ?? []).find(
       (item) => String(item.issueId ?? '') === String(issueId) && item.sessionId,
     )
     if (!hit) return null
+    const sessionId = String(hit.sessionId)
+    if (!(await this.sessionExists(sessionId))) {
+      this.forgetSession(sessionId)
+      return null
+    }
     return {
-      sessionId: String(hit.sessionId),
+      sessionId,
       sessionTitle: text(hit.sessionTitle, 160),
       branch: text(hit.branch, 120),
       workspaceId: String(hit.workspaceId ?? ''),
       fixed: hit.fixed === true,
       status: text(hit.status, 40),
     }
+  }
+
+  /**
+   * 会话是否还在：内存里有就是活的，否则看持久化列表里有没有它。
+   * 已经删进回收站的会话两处都不会有，正好用来判定「删干净了」。
+   * @param {string} sessionId - 会话 id。
+   * @returns {Promise<boolean>} 存在与否。
+   */
+  async sessionExists(sessionId) {
+    if (!sessionId) return false
+    if (this.ctx.get('sessions')?.get?.(sessionId) !== undefined) return true
+    const persistence = this.ctx.get('sessionPersistence')
+    if (!persistence?.list) return true
+    try {
+      const snapshots = await persistence.list()
+      return snapshots.some((item) => item?.header?.id === sessionId)
+    } catch {
+      // 读不出持久化列表时不要判定「不存在」，否则一次 I/O 抖动就把绑定清了。
+      return true
+    }
+  }
+
+  /**
+   * 把一个已经不存在（或被删除）的会话从插件自己记的账上清掉：
+   * 分支映射、标题、工作项全文、兜底注入标记、worktrees 记录里的引用，一处都别留。
+   * 下一次为同一个分支建会话时就会老老实实建一个新的。
+   * @param {string} sessionId - 会话 id。
+   */
+  forgetSession(sessionId) {
+    const id = String(sessionId ?? '')
+    if (!id) return
+    this.sessions.delete(id)
+    if (this.state.issueSessionTitles?.[id] !== undefined) delete this.state.issueSessionTitles[id]
+    if (this.state.sessionBriefs?.[id] !== undefined) delete this.state.sessionBriefs[id]
+    if (this.state.kickoffDelivered?.[id] !== undefined) delete this.state.kickoffDelivered[id]
+    for (const [key, value] of Object.entries(this.state.issueSessions ?? {})) {
+      if (value === id) delete this.state.issueSessions[key]
+    }
+    this.state.worktrees = (this.state.worktrees ?? []).filter((item) => String(item.sessionId ?? '') !== id)
+    void this.persist().catch(() => {})
   }
 
   issueApiBase() {
@@ -3972,8 +4024,11 @@ export class ChoerodonPlugin {
 
     // 同一条分支这次运行里已经建过会话才复用。用户把对话删掉/归档了、
     // 或者 DSH 重启过（内存里没有句柄），都按「新建一个对话」处理。
+    // 归档集只能挡住「归档」这一种消失方式；会话被「删除会话」清掉时归档集里
+    // 反而没有它（删除会顺手把归档标记一起摘掉），所以这里必须按会话是否真的还存在
+    // 来判断，否则删掉的会话会被这条映射重新捡回来。
     const archived = new Set(this.ctx.get('workspaceRegistry')?.archivedSessionIds ?? [])
-    if (known && this.sessions.has(known) && !archived.has(known)) {
+    if (known && this.sessions.has(known) && !archived.has(known) && await this.sessionExists(known)) {
       // 旧版本建的会话没登记过工作区，这里补一次。
       const attached = await this.attachWorkspaceSession(repoDir, known)
       return {
@@ -3984,6 +4039,7 @@ export class ChoerodonPlugin {
         workspaceError: attached.error ?? '',
       }
     }
+    if (known && this.sessions.has(known)) this.forgetSession(known)
 
     const sessionId = randomUUID()
     const title = `${issueNum} ${summary}`.slice(0, 120)

@@ -540,59 +540,6 @@ window.__ModuleLoader__.load({
         padding-bottom: 12px; margin-bottom: 12px;
         border-bottom: 1px solid var(--c7n-line);
       }
-      /* ---------- 会话头右上角的「本次工作项」入口 ---------- */
-      .c7n-brief-chip {
-        display: inline-flex; align-items: center; gap: 6px;
-        height: 26px; padding: 0 9px; margin: 0;
-        border: 1px solid var(--c7n-line); border-radius: 7px;
-        background: var(--c7n-surface); color: var(--c7n-text);
-        font: inherit; font-size: 11.5px; font-weight: 600;
-        cursor: pointer; white-space: nowrap;
-        transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
-      }
-      .c7n-brief-chip:hover { border-color: var(--c7n-accent); color: var(--c7n-accent); }
-      .c7n-brief-chip:focus-visible { outline: none; border-color: var(--c7n-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c7n-accent) 20%, transparent); }
-      .c7n-brief-dot {
-        width: 5px; height: 5px; border-radius: 50%;
-        background: var(--c7n-accent); flex: 0 0 auto;
-      }
-      .c7n-brief-chip-num { overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
-      .c7n-brief-backdrop { position: fixed; inset: 0; z-index: 60; }
-      .c7n-brief-pop {
-        position: fixed; top: 56px; right: 18px; z-index: 61;
-        display: flex; flex-direction: column;
-        width: min(560px, calc(100vw - 36px));
-        max-height: min(62vh, 540px);
-        border: 1px solid var(--c7n-line-strong); border-radius: 10px;
-        background: var(--c7n-surface); color: var(--c7n-text);
-        box-shadow: var(--c7n-shadow); overflow: hidden;
-      }
-      .c7n-brief-pop-head {
-        display: flex; align-items: center; gap: 8px;
-        padding: 10px 12px; border-bottom: 1px solid var(--c7n-line);
-        background: var(--c7n-surface-2);
-      }
-      .c7n-brief-pop-title {
-        flex: 1 1 auto; min-width: 0; font-size: 12.5px; font-weight: 650;
-        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-      }
-      .c7n-brief-action {
-        flex: 0 0 auto;
-        border: 1px solid var(--c7n-line); border-radius: 6px;
-        background: var(--c7n-surface); color: var(--c7n-muted);
-        font: inherit; font-size: 11.5px; padding: 2px 8px;
-        cursor: pointer; transition: color 120ms ease, border-color 120ms ease;
-      }
-      .c7n-brief-action:hover { color: var(--c7n-accent); border-color: var(--c7n-accent); }
-      .c7n-brief-action:focus-visible { outline: none; border-color: var(--c7n-accent); }
-      .c7n-brief-pop-body {
-        flex: 1 1 auto; min-height: 0;
-        margin: 0; padding: 12px 14px; overflow: auto;
-        color: var(--c7n-text);
-        font-family: var(--ds-font-family-code, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
-        font-size: 11.5px; line-height: 1.65;
-        white-space: pre-wrap; word-break: break-word;
-      }
     `
 
     /** 把手写规则塞进 document.head；apply 卸载时一起收回。 */
@@ -4251,88 +4198,6 @@ window.__ModuleLoader__.load({
       )
     }
 
-    /**
-     * 会话头右上角的「本次工作项」入口。
-     *
-     * 从猪齿鱼开的会话，在用户发出第一条消息之前日志里没有任何可展示的节点 ——
-     * Host 把工作项全文先放进 inbox（模型看得到、界面看不到），所以打开会话是白的。
-     * 摘要走 Host 另存的那份，入口放在会话工具的右上角，点开是浮层全文；
-     * 不再在输入框上方压一条卡片。
-     */
-    function SessionBriefChip({ sessionId }) {
-      const [brief, setBrief] = useState(null)
-      const [open, setOpen] = useState(false)
-      useEffect(() => {
-        if (!sessionId) {
-          setBrief(null)
-          setOpen(false)
-          return undefined
-        }
-        let alive = true
-        api(`/session-brief?sessionId=${encodeURIComponent(String(sessionId))}`)
-          .then((data) => {
-            // 这里只负责显示摘要；填草稿是建会话那一步的事（seedDraft），
-            // 会话头在空白首页根本不渲染，挂在这里会晚一步。
-            if (alive) setBrief(data?.brief ?? null)
-          })
-          .catch(() => {
-            // 没登录或宿主还是旧代码时安静降级：这块只是补充说明，不该挡住会话本身。
-            if (alive) setBrief(null)
-          })
-        return () => {
-          alive = false
-        }
-      }, [sessionId])
-      useEffect(() => {
-        if (!open) return undefined
-        const onKey = (event) => {
-          if (event.key === 'Escape') setOpen(false)
-        }
-        window.addEventListener('keydown', onKey)
-        return () => window.removeEventListener('keydown', onKey)
-      }, [open])
-      if (!brief) return null
-      const heading = [brief.num, brief.summary].filter(Boolean).join(' ')
-      const copy = () => {
-        void navigator.clipboard?.writeText(brief.kickoff)
-      }
-      return h(
-        React.Fragment,
-        null,
-        h(
-          'button',
-          {
-            type: 'button',
-            className: 'c7n-brief-chip',
-            title: heading || '本次工作项',
-            'aria-expanded': open,
-            onClick: () => setOpen((value) => !value),
-          },
-          h('span', { className: 'c7n-brief-dot' }),
-          h('span', { className: 'c7n-brief-chip-num' }, brief.num || '工作项'),
-        ),
-        open
-          ? h(
-            React.Fragment,
-            null,
-            h('div', { className: 'c7n-brief-backdrop', onClick: () => setOpen(false) }),
-            h(
-              'div',
-              { className: 'c7n-brief-pop', role: 'dialog', 'aria-label': heading || '本次工作项' },
-              h(
-                'div',
-                { className: 'c7n-brief-pop-head' },
-                h('span', { className: 'c7n-brief-pop-title', title: heading }, heading || '（无概要）'),
-                h('button', { type: 'button', className: 'c7n-brief-action', onClick: copy }, '复制'),
-                h('button', { type: 'button', className: 'c7n-brief-action', onClick: () => setOpen(false) }, '关闭'),
-              ),
-              h('pre', { className: 'c7n-brief-pop-body' }, brief.kickoff),
-            ),
-          )
-          : null,
-      )
-    }
-
     return {
       inject: ['slots'],
       apply(ctx) {
@@ -4347,13 +4212,8 @@ window.__ModuleLoader__.load({
           ctx.slots.register({ name: 'sidebar.panellist.trailing', id: 'choerodon', order: 0 }, TaskBadge),
         )
         ctx.slots.inject('main', () => ctx.slots.register({ name: 'main', key: 'choerodon' }, ChoerodonPanel))
-        // 会话头右上角的工作项入口：从猪齿鱼建的会话一打开就能点开看任务本身。
-        ctx.slots.inject('conversation.session.header.utilities', () =>
-          ctx.slots.register(
-            { name: 'conversation.session.header.utilities', id: 'choerodon-brief', order: 20, label: '本次工作项' },
-            SessionBriefChip,
-          ),
-        )
+        // 会话头右上角不再挂「本次工作项」入口：从猪齿鱼建的会话已经直接把工作项全文
+        // 填进输入框（seedDraft），人就在那一屏看着同一份文本，头上再放一个入口只是重复。
 
         // 轮询：60 秒一次，页面隐藏时跳过，卸载时清掉。
         let timer = null

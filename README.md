@@ -63,8 +63,12 @@ plugin_manager install_bundle target=file:<dsh-choerodon-0.9.1.tgz 的绝对路�
    但这只是上下文、不会替你开工——补一句要求再发送，模型才真正开始干活。
    第一次发消息之前会话日志里没有可展示的节点，所以 Host 先把工作项全文留给界面：
    新建会话时界面把它填进输入框草稿（`requestDraftInitialization`），你可以先看、改一句、
-   甚至整段换掉再发；会话头右上角的「本次工作项」还能随时点开原文。填不进去时
-   Host 才走 `/choerodon/session-context` 兜底注入一次，别让模型凭空开工。
+   甚至整段换掉再发。会话头右上角不再放「本次工作项」入口——那种会话本来就停在输入框那一屏，
+   再放一个入口只是和草稿重复。草稿填不进去时 Host 才走 `/choerodon/session-context`
+   兜底注入一次，别让模型凭空开工。
+
+   工作项账上记着的 sessionId 会先核对会话是否真的还在（内存或持久化里任一处）：已经用
+   「删除会话」清掉的会话不会再被带出来，也不会被重新打开，顺手把那条失效绑定清掉。
 
 插件不执行 `push` / `merge` / `rebase` / `reset --hard`。
 
